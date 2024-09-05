@@ -1,4 +1,4 @@
-package com.example.usermanagement.model;
+package org.example.minispringusermanagement;
 
 public enum Role {
     ADMIN,
