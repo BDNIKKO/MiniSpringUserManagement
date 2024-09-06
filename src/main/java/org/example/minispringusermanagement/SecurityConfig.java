@@ -20,38 +20,35 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
 
-    private JwtRequestFilter jwtRequestFilter;  // Use setter injection to avoid circular dependency
+    private final JwtRequestFilter jwtRequestFilter;
 
     @Autowired
-    public void setJwtRequestFilter(JwtRequestFilter jwtRequestFilter) {
+    public SecurityConfig(JwtRequestFilter jwtRequestFilter) {
         this.jwtRequestFilter = jwtRequestFilter;
     }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // Disable CSRF for simplicity
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/users/register", "/authenticate").permitAll() // Allow registration and authentication
-                        .requestMatchers("/users/**").hasAnyRole("USER", "ADMIN") // Secure /users endpoints
-                        .requestMatchers("/admin/**").hasRole("ADMIN") // Only ADMIN can access admin endpoints
-                        .requestMatchers("/h2-console/**").permitAll() // Allow access to H2 Console
-                        .anyRequest().authenticated() // All other endpoints require authentication
+                        .requestMatchers("/users/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .anyRequest().authenticated()
                 )
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin) // Allow H2 to be rendered in iframes
                 )
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Make stateless
-                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class); // Add JWT filter
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Stateless sessions
+                .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-
-
     @Bean
     public UserDetailsService userDetailsService() {
-        // In-memory user details for testing purposes
         return new InMemoryUserDetailsManager(
                 org.springframework.security.core.userdetails.User.withUsername("admin")
                         .password(passwordEncoder().encode("adminPass"))

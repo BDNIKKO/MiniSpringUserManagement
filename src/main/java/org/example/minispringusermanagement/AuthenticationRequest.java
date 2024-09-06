@@ -1,5 +1,6 @@
 package org.example.minispringusermanagement;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,21 +8,9 @@ import lombok.Setter;
 @Getter
 public class AuthenticationRequest {
 
-    // Setter for username
-    // Getter for username
+    @NotBlank(message = "Username is mandatory")
     private String username;
-    // Setter for password
-    // Getter for password
+
+    @NotBlank(message = "Password is mandatory")
     private String password;
-
-    // Default constructor
-    public AuthenticationRequest() {
-    }
-
-    // Constructor with parameters
-    public AuthenticationRequest(String username, String password) {
-        this.username = username;
-        this.password = password;
-    }
-
 }

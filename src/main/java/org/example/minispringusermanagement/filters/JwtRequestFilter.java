@@ -22,9 +22,9 @@ import java.io.IOException;
 public class JwtRequestFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-    // Setter injection for UserDetailsService to avoid circular dependency
+
     @Setter
-    private UserDetailsService userDetailsService; // Setter will be used for this to prevent circular dependencies
+    private UserDetailsService userDetailsService;
 
     // Constructor-based injection for JwtUtil
     public JwtRequestFilter(JwtUtil jwtUtil) {
@@ -38,15 +38,19 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         final String authorizationHeader = request.getHeader("Authorization");
-
         String username = null;
         String jwt = null;
+
+        // Log the incoming request and authorization header
+        logger.info("Incoming request to: " + request.getRequestURI());
+        logger.info("Authorization Header: " + authorizationHeader);
 
         // Check for Bearer token in the authorization header
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
             try {
                 username = jwtUtil.extractUsername(jwt);
+                logger.info("JWT Token extracted for user: " + username);
             } catch (ExpiredJwtException e) {
                 logger.warn("JWT Token has expired");
             } catch (Exception e) {
@@ -60,12 +64,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
             // Validate the JWT token
             if (jwtUtil.validateToken(jwt, userDetails)) {
+                logger.info("JWT Token is valid. Authenticating user: " + username);
                 UsernamePasswordAuthenticationToken authenticationToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 // Set the authentication in the security context
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            } else {
+                logger.warn("Invalid JWT Token for user: " + username);
             }
         }
 

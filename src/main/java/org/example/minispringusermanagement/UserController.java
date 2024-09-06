@@ -1,6 +1,7 @@
 package org.example.minispringusermanagement;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -29,7 +30,7 @@ public class UserController {
             // Collect all validation error messages
             String errorMessages = bindingResult.getAllErrors()
                     .stream()
-                    .map(error -> error.getDefaultMessage())
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.joining(", "));
             return ResponseEntity.badRequest().body(errorMessages);
         }
@@ -92,7 +93,7 @@ public class UserController {
         if (bindingResult.hasErrors()) {
             String errorMessages = bindingResult.getAllErrors()
                     .stream()
-                    .map(error -> error.getDefaultMessage())
+                    .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.joining(", "));
             return ResponseEntity.badRequest().body(errorMessages);
         }
