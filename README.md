@@ -36,7 +36,7 @@ This is a Spring Boot application that implements user management functionalitie
 
 ## Requirements
 
-- **Java JDK 11**
+- **Java JDK 17**
 - **Maven**
 - **Postman** or any API testing tool.
 - **H2 Database** (In-memory database setup included).
